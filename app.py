@@ -2,6 +2,7 @@ import pandas as pd
 import os
 from flask import Flask, jsonify
 import requests
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -25,7 +26,38 @@ def fetch_live_data():
     data = response.json()
 
     # Take the latest available hour (last element in list)
-    i = -1
+   
+
+def fetch_live_data():
+    url = "https://air-quality-api.open-meteo.com/v1/air-quality"
+    params = {
+        "latitude": 19.0760,
+        "longitude": 72.8777,
+        "hourly": "pm2_5,pm10",
+        "timezone": "auto"
+    }
+
+    response = requests.get(url, params=params)
+    data = response.json()
+
+    # list of timestamps from API
+    times = data["hourly"]["time"]
+    now = datetime.now().strftime("%Y-%m-%dT%H:00")
+
+    # find index of current hour
+    if now in times:
+        i = times.index(now)
+    else:
+        i = -1  # fallback
+
+    entry = {
+        "timestamp": times[i],
+        "pm2_5": data["hourly"]["pm2_5"][i],
+        "pm10": data["hourly"]["pm10"][i]
+    }
+
+    return entry
+
 
     entry = {
         "timestamp": data["hourly"]["time"][i],
